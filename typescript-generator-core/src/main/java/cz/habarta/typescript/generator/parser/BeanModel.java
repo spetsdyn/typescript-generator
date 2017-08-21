@@ -2,6 +2,8 @@
 package cz.habarta.typescript.generator.parser;
 
 import cz.habarta.typescript.generator.util.Utils;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -14,15 +16,17 @@ public class BeanModel extends DeclarationModel {
     private final String discriminantLiteral;
     private final List<Type> interfaces;
     private final List<PropertyModel> properties;
+    private final List<Annotation> annotations;
 
-    public BeanModel(Class<?> origin, Type parent, List<Class<?>> taggedUnionClasses, String discriminantProperty, String discriminantLiteral, List<Type> interfaces, List<PropertyModel> properties, List<String> comments) {
+    public BeanModel(Class<?> origin, Type parent, List<Class<?>> taggedUnionClasses, String discriminantProperty, String discriminantLiteral, List<Type> interfaces, List<PropertyModel> properties, List<String> comments, List<Annotation> annotations) {
         super(origin, comments);
         this.parent = parent;
         this.taggedUnionClasses = taggedUnionClasses;
         this.discriminantProperty = discriminantProperty;
         this.discriminantLiteral = discriminantLiteral;
         this.interfaces = Utils.listFromNullable(interfaces);
-        this.properties = properties;
+        this.properties = Utils.listFromNullable(properties);
+        this.annotations = Utils.listFromNullable(annotations);
     }
 
     public Type getParent() {
@@ -58,13 +62,17 @@ public class BeanModel extends DeclarationModel {
         return properties;
     }
 
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
     public BeanModel withProperties(List<PropertyModel> properties) {
-        return new BeanModel(origin, parent, taggedUnionClasses, discriminantProperty, discriminantLiteral, interfaces, properties, comments);
+        return new BeanModel(origin, parent, taggedUnionClasses, discriminantProperty, discriminantLiteral, interfaces, properties, comments, annotations);
     }
 
     @Override
     public BeanModel withComments(List<String> comments) {
-        return new BeanModel(origin, parent, taggedUnionClasses, discriminantProperty, discriminantLiteral, interfaces, properties, comments);
+        return new BeanModel(origin, parent, taggedUnionClasses, discriminantProperty, discriminantLiteral, interfaces, properties, comments, annotations);
     }
 
     @Override

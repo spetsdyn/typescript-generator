@@ -1,12 +1,14 @@
 
 package cz.habarta.typescript.generator;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 
 @SuppressWarnings("rawtypes")
 public class DummyBean {
 
+    @NotNull
     public String firstProperty;
     public int intProperty;
     public Integer integerProperty;

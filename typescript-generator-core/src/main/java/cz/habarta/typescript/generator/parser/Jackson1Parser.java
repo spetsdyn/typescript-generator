@@ -73,14 +73,14 @@ public class Jackson1Parser extends ModelParser {
                     }
                 }
                 final Member originalMember = beanPropertyWriter.getMember().getMember();
-                properties.add(processTypeAndCreateProperty(beanPropertyWriter.getName(), propertyType, optional, sourceClass.type, originalMember, null));
+                properties.add(processTypeAndCreateProperty(beanPropertyWriter.getName(), propertyType, optional, sourceClass.type, originalMember, null,null));
             }
         }
 
         final JsonTypeInfo jsonTypeInfo = sourceClass.type.getAnnotation(JsonTypeInfo.class);
         if (jsonTypeInfo != null && jsonTypeInfo.include() == JsonTypeInfo.As.PROPERTY) {
             if (!containsProperty(properties, jsonTypeInfo.property())) {
-                properties.add(new PropertyModel(jsonTypeInfo.property(), String.class, false, null, null, null));
+                properties.add(new PropertyModel(jsonTypeInfo.property(), String.class, false, null, null, null, null));
             }
         }
 
@@ -98,7 +98,7 @@ public class Jackson1Parser extends ModelParser {
         for (Type aInterface : interfaces) {
             addBeanToQueue(new SourceType<>(aInterface, sourceClass.type, "<interface>"));
         }
-        return new BeanModel(sourceClass.type, superclass, null, null, null, interfaces, properties, null);
+        return new BeanModel(sourceClass.type, superclass, null, null, null, interfaces, properties, null, null);
     }
 
     private BeanHelper getBeanHelper(Class<?> beanClass) {

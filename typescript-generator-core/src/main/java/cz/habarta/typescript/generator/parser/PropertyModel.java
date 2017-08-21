@@ -1,6 +1,7 @@
 
 package cz.habarta.typescript.generator.parser;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -14,6 +15,7 @@ public class PropertyModel {
     private final Member originalMember;
     private final PullProperties pullProperties;
     private final List<String> comments;
+    private final List<Annotation> annotations;
 
     public static class PullProperties {
         public final String prefix;
@@ -25,13 +27,14 @@ public class PropertyModel {
         }
     }
 
-    public PropertyModel(String name, Type type, boolean optional, Member originalMember, PullProperties pullProperties, List<String> comments) {
+    public PropertyModel(String name, Type type, boolean optional, Member originalMember, PullProperties pullProperties, List<String> comments, List<Annotation> annotations) {
         this.name = name;
         this.type = type;
         this.optional = optional;
         this.originalMember = originalMember;
         this.pullProperties = pullProperties;
         this.comments = comments;
+        this.annotations = annotations;
     }
 
     public String getName() {
@@ -51,7 +54,7 @@ public class PropertyModel {
     }
 
     public PropertyModel originalMember(Member originalMember) {
-        return new PropertyModel(name, type, optional, originalMember, pullProperties, comments);
+        return new PropertyModel(name, type, optional, originalMember, pullProperties, comments, annotations);
     }
 
     public PullProperties getPullProperties() {
@@ -62,8 +65,12 @@ public class PropertyModel {
         return comments;
     }
 
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
     public PropertyModel withComments(List<String> comments) {
-        return new PropertyModel(name, type, optional, originalMember, pullProperties, comments);
+        return new PropertyModel(name, type, optional, originalMember, pullProperties, comments, annotations);
     }
 
     @Override

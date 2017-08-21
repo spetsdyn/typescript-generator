@@ -91,7 +91,7 @@ public class ModelCompiler {
 
     public TsType javaToTypeScript(Type type) {
         final BeanModel beanModel = new BeanModel(Object.class, Object.class, null, null, null, Collections.<Type>emptyList(),
-                Collections.singletonList(new PropertyModel("property", type, false, null, null, null)), null);
+                Collections.singletonList(new PropertyModel("property", type, false, null, null, null, null)), null, null);
         final Model model = new Model(Collections.singletonList(beanModel), Collections.<EnumModel>emptyList(), null);
         final TsModel tsModel = javaToTypeScript(model);
         return tsModel.getBeans().get(0).getProperties().get(0).getTsType();
@@ -159,10 +159,14 @@ public class ModelCompiler {
             final TsType discriminantType = literals.isEmpty()
                     ? TsType.String
                     : new TsType.UnionType(literals);
-            properties.add(0, new TsPropertyModel(bean.getDiscriminantProperty(), discriminantType, settings.declarePropertiesAsReadOnly, /*ownProperty*/ true, null));
+            properties.add(0, new TsPropertyModel(bean.getDiscriminantProperty(), discriminantType, settings.declarePropertiesAsReadOnly, /*ownProperty*/ true, null, null));
+        }
+        final List<String> annotations = new ArrayList<>();
+        for (Annotation annotation : bean.getAnnotations()) {
+            annotations.add(annotation.annotationType().getSimpleName());
         }
 
-        return new TsBeanModel(bean.getOrigin(), TsBeanCategory.Data, isClass, beanIdentifier, typeParameters, parentType, bean.getTaggedUnionClasses(), interfaces, properties, null, null, bean.getComments());
+        return new TsBeanModel(bean.getOrigin(), TsBeanCategory.Data, isClass, beanIdentifier, typeParameters, parentType, bean.getTaggedUnionClasses(), interfaces, properties, null, null, bean.getComments(), annotations);
     }
 
     private List<TsPropertyModel> processProperties(SymbolTable symbolTable, Model model, BeanModel bean, String prefix, String suffix) {
@@ -210,7 +214,7 @@ public class ModelCompiler {
     private TsPropertyModel processProperty(SymbolTable symbolTable, BeanModel bean, PropertyModel property, String prefix, String suffix) {
         final TsType type = typeFromJava(symbolTable, property.getType(), property.getName(), bean.getOrigin());
         final TsType tsType = property.isOptional() ? type.optional() : type;
-        return new TsPropertyModel(prefix + property.getName() + suffix, tsType, settings.declarePropertiesAsReadOnly, false, property.getComments());
+        return new TsPropertyModel(prefix + property.getName() + suffix, tsType, settings.declarePropertiesAsReadOnly, false, property.getComments(), property.getAnnotations());
     }
 
     private TsEnumModel processEnum(SymbolTable symbolTable, EnumModel enumModel) {
@@ -330,7 +334,7 @@ public class ModelCompiler {
         final List<TsType.GenericVariableType> typeParameters = Utils.listFromNullable(optionsGenericVariable);
         final Map<Symbol, List<TsMethodModel>> groupedMethods = processJaxrsMethods(jaxrsApplication, symbolTable, null, responseSymbol, optionsType, false);
         for (Map.Entry<Symbol, List<TsMethodModel>> entry : groupedMethods.entrySet()) {
-            final TsBeanModel interfaceModel = new TsBeanModel(null, TsBeanCategory.Service, false, entry.getKey(), typeParameters, null, null, null, null, null, entry.getValue(), null);
+            final TsBeanModel interfaceModel = new TsBeanModel(null, TsBeanCategory.Service, false, entry.getKey(), typeParameters, null, null, null, null, null, entry.getValue(), null, null);
             tsModel.getBeans().add(interfaceModel);
         }
         return tsModel;
@@ -352,7 +356,7 @@ public class ModelCompiler {
                                 optionsType != null ? new TsProperty("options", new TsType.OptionalType(optionsType)) : null
                         ))
                 ), null, null)
-        ), null));
+        ), null, null));
 
         // application client classes
         final TsType.ReferenceType httpClientType = optionsGenericVariable != null
@@ -369,7 +373,7 @@ public class ModelCompiler {
             final Symbol symbol = settings.generateJaxrsApplicationInterface ? symbolTable.addSuffixToSymbol(entry.getKey(), "Client") : entry.getKey();
             final TsType interfaceType = settings.generateJaxrsApplicationInterface ? new TsType.ReferenceType(entry.getKey()) : null;
             final TsBeanModel clientModel = new TsBeanModel(null, TsBeanCategory.Service, true, symbol, typeParameters, null, null,
-                    Utils.listFromNullable(interfaceType), null, constructor, entry.getValue(), null);
+                    Utils.listFromNullable(interfaceType), null, constructor, entry.getValue(), null, null);
             tsModel.getBeans().add(clientModel);
         }
         // helper

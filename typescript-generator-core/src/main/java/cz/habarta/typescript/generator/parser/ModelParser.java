@@ -5,6 +5,8 @@ import cz.habarta.typescript.generator.compiler.EnumMemberModel;
 import cz.habarta.typescript.generator.compiler.EnumKind;
 import cz.habarta.typescript.generator.compiler.SymbolTable;
 import cz.habarta.typescript.generator.*;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -95,12 +97,12 @@ public abstract class ModelParser {
         typeQueue.add(sourceType);
     }
 
-    protected PropertyModel processTypeAndCreateProperty(String name, Type type, boolean optional, Class<?> usedInClass, Member originalMember, PropertyModel.PullProperties pullProperties) {
+    protected PropertyModel processTypeAndCreateProperty(String name, Type type, boolean optional, Class<?> usedInClass, Member originalMember, PropertyModel.PullProperties pullProperties, List<Annotation> annotations) {
         List<Class<?>> classes = discoverClassesUsedInType(type);
         for (Class<?> cls : classes) {
             typeQueue.add(new SourceType<>(cls, usedInClass, name));
         }
-        return new PropertyModel(name, type, optional, originalMember, pullProperties, null);
+        return new PropertyModel(name, type, optional, originalMember, pullProperties, null, annotations);
     }
 
     private List<Class<?>> discoverClassesUsedInType(Type type) {

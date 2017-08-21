@@ -5,6 +5,7 @@ import cz.habarta.typescript.generator.*;
 import cz.habarta.typescript.generator.compiler.EnumMemberModel;
 import cz.habarta.typescript.generator.util.Utils;
 import java.io.*;
+import java.lang.annotation.Annotation;
 import java.text.*;
 import java.util.*;
 
@@ -162,6 +163,9 @@ public class Emitter implements EmitterExtension.Writer {
     private void emitBean(TsBeanModel bean, boolean exportKeyword) {
         writeNewLine();
         emitComments(bean.getComments());
+        for (String annotation : bean.getAnnotations()) {
+            writeIndentedLine("@"+annotation);
+        }
         final String declarationType = bean.isClass() ? "class" : "interface";
         final String typeParameters = bean.getTypeParameters().isEmpty() ? "" : "<" + Utils.join(bean.getTypeParameters(), ", ")+ ">";
         final List<TsType> extendsList = bean.getExtendsList();
@@ -185,6 +189,10 @@ public class Emitter implements EmitterExtension.Writer {
 
     private void emitProperty(TsPropertyModel property) {
         emitComments(property.getComments());
+        for (Annotation annotation : property.getAnnotations()) {
+            String annotationName = annotation.annotationType().getSimpleName();
+            writeIndentedLine("@" + annotationName);
+        }
         final TsType tsType = property.getTsType();
         final String readonly = property.readonly ? "readonly " : "";
         final String questionMark = settings.declarePropertiesAsOptional || (tsType instanceof TsType.OptionalType) ? "?" : "";
